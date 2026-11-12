@@ -62,7 +62,9 @@ class RequestEventsListenerH2Test {
         RequestProjection projection = projections.findById(requestId).orElseThrow();
         assertThat(projection.getStatus()).isEqualTo(RequestStatus.INGRESADO);
         assertThat(projection.getCreatedAt()).isEqualTo(Instant.parse("2026-11-10T13:00:00Z"));
-        assertThat(projection.getSlaStatus()).isNull();
+        assertThat(projection.getDueDate()).isEqualTo("2026-11-17");
+        assertThat(projection.getDueSoonDate()).isEqualTo("2026-11-14");
+        assertThat(projection.getSlaStatus()).isNotNull();
         ProcessedEvent marker = processedEvents.findById(
                 new ProcessedEvent.Key("report", event.get("eventId").asText())).orElseThrow();
         assertThat(marker.getProcessedAt()).isNotNull();

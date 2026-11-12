@@ -10,7 +10,7 @@ spring:
   application:
     name: ms-barriodigital-report
   config:
-    import: optional:file:.env[.properties]
+    import: optional:file:.env[.properties],classpath:holidays-cl.yml
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     # Solo kafka-admin crea topics. Report no declara NewTopic.
@@ -86,6 +86,9 @@ barriodigital:
   report:
     scheduling:
       enabled: true
+  # Fijo por contrato: POR_VENCER con 2 días hábiles o menos, contando hoy si es hábil y el vencimiento.
+  sla:
+    due-soon-business-days: 2
 
 management:
   endpoints:
@@ -95,6 +98,11 @@ management:
   endpoint:
     health:
       show-details: when_authorized
+      # Solo el grupo del calendario muestra su detalle sin autorización: es informativo y no expone la base.
+      group:
+        sla:
+          include: sla
+          show-details: always
   health:
     db:
       enabled: true
