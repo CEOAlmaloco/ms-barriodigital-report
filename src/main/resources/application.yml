@@ -16,6 +16,39 @@ spring:
     # Solo kafka-admin crea topics. Report no declara NewTopic.
     admin:
       auto-create: false
+    consumer:
+      group-id: report-group
+      enable-auto-commit: false
+      auto-offset-reset: earliest
+      max-poll-records: 50
+      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      properties:
+        spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
+        spring.deserializer.value.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
+        # Range ordena los miembros por id. Con el prefijo report del listener, los hilos de dos instancias
+        # se intercalan (report-0, report-0, report-1...) y las 3 particiones quedan repartidas entre ambas.
+        partition.assignment.strategy: org.apache.kafka.clients.consumer.RangeAssignor
+    # Solo publica en la DLT.
+    producer:
+      acks: all
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      properties:
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 5
+        max.block.ms: 5000
+        request.timeout.ms: 5000
+        delivery.timeout.ms: 10000
+        linger.ms: 0
+    listener:
+      ack-mode: record
+      concurrency: 3
+  task:
+    scheduling:
+      pool:
+        size: 2
+      thread-name-prefix: report-scheduled-
   jackson:
     deserialization:
       accept-float-as-int: false
@@ -42,6 +75,17 @@ spring:
       hibernate:
         jdbc:
           time_zone: UTC
+
+barriodigital:
+  kafka:
+    topic:
+      requests-events: requests.events
+      requests-events-dlt: requests.events.report.DLT
+    listener:
+      auto-startup: true
+  report:
+    scheduling:
+      enabled: true
 
 management:
   endpoints:
