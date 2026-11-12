@@ -1,0 +1,10 @@
+target/
+.env
+.env.*
+!.env.example
+wallet/
+**/Wallet_*/
+*.p12
+*.jks
+*.pem
+*.key
