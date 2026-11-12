@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Un hilo por partición. Valida, convierte y delega en KpiService. El offset se confirma al retornar
- * (AckMode.RECORD), después del commit en Oracle.
+ * (AckMode.RECORD), después del commit en Oracle. Lo arranca SlaStartup, después del recálculo de plazos.
  */
 @Component
 public class RequestEventsListener {
@@ -36,7 +36,7 @@ public class RequestEventsListener {
             topics = "${barriodigital.kafka.topic.requests-events}",
             concurrency = "3",
             clientIdPrefix = CONSUMER,
-            autoStartup = "${barriodigital.kafka.listener.auto-startup:true}")
+            autoStartup = "false")
     public void onMessage(ConsumerRecord<String, String> record) {
         switch (mapper.map(record.value())) {
             case MappedEvent.Unknown unknown -> log.warn(

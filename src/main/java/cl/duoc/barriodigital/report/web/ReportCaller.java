@@ -11,6 +11,7 @@ import java.util.Set;
 public final class ReportCaller {
 
     public static final String HEADER_USER_ROLES = "X-User-Roles";
+    public static final String HEADER_USER_ID = "X-User-Id";
     public static final String FORBIDDEN_MESSAGE = "No tienes el rol necesario para este recurso";
 
     public static final String VECINO = "Vecino";
@@ -23,11 +24,12 @@ public final class ReportCaller {
     private ReportCaller() {
     }
 
-    public static void requireRole(String rolesHeader, Set<String> allowed) {
+    public static String requireRole(String rolesHeader, Set<String> allowed) {
         List<String> roles = roles(rolesHeader);
         if (roles.size() != 1 || !allowed.contains(roles.get(0))) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, FORBIDDEN_MESSAGE);
         }
+        return roles.get(0);
     }
 
     /** Mismo criterio que requests: sin prefijo ROLE_, sin distinguir mayúsculas, y lo que no es un rol no cuenta. */

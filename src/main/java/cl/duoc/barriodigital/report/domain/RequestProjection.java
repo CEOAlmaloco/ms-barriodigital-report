@@ -175,6 +175,29 @@ public class RequestProjection implements Persistable<String> {
         }
     }
 
+    /**
+     * Las fechas se recalculan con el calendario cargado también al cerrar: si el recálculo del arranque falló para
+     * este trámite, el cierre no se evalúa con una fecha vieja. Un resultado ya evaluado no se vuelve a calcular.
+     */
+    public void refreshSla(SlaCalculator calculator, LocalDate today) {
+        if (isPartial()) {
+            return;
+        }
+        if (slaBusinessDays == null) {
+            slaStatus = SlaStatus.SIN_PLAZO;
+            return;
+        }
+        if (slaStatus != null && slaStatus.isFinal()) {
+            return;
+        }
+        SlaCalculator.SlaDates dates = calculator.dates(createdAt, slaBusinessDays);
+        dueDate = dates.dueDate();
+        dueSoonDate = dates.dueSoonDate();
+        slaStatus = closedAt == null
+                ? calculator.openStatus(dates, today)
+                : calculator.closedStatus(status, closedAt, dueDate);
+    }
+
     public boolean isPartial() {
         return createdAt == null;
     }
