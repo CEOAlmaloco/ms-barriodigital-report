@@ -14,8 +14,16 @@ Los contratos están en `barriodigital-infra/docs/decisiones.md`: tópicos y eve
 
 | Método | Ruta | Descripción |
 |---|---|---|
+| GET | `/api/report/kpis?range=last24h\|last7d` | Altas por tramo, abiertos por estado, promedio de resolución y cumplimiento de plazo. Admin y Auditor |
+| GET | `/api/report/top-procedures?range=last24h\|last7d&limit=5` | Tipos con más altas en la ventana. Admin y Auditor |
 | GET | `/actuator/health` | Estado del servicio, incluida la base de datos (`db`) |
 | GET | `/actuator/info` | Información del servicio |
+
+Solo el BFF llama a `/api/report/**`, sin JWT: el servicio vuelve a comprobar `X-User-Roles`, que debe traer exactamente un rol permitido. Si no, responde 403. Los parámetros se validan después del rol (400). Los errores llevan `status`, `error`, `message` y `path`.
+
+```powershell
+Invoke-RestMethod "http://localhost:8086/api/report/kpis?range=last7d" -Headers @{ "X-User-Roles" = "Admin" }
+```
 
 `show-details` es `when_authorized`: sin autorización, el health devuelve solo el estado general, sin el detalle por componente. El health no incluye Kafka.
 
@@ -142,6 +150,9 @@ Los tests usan H2 en modo Oracle, con las tablas de `src/test/resources/db/h2-re
 - `RequestEventsKafkaTest`: offset confirmado, malformado a la DLT con sus headers, recuperable agotado tras 4 ejecuciones y desconocido sin DLT.
 - `RequestEventsDltUnavailableKafkaTest`: sin DLT el offset no avanza; al crearla, el mensaje llega y se confirma.
 - `RequestEventsBalancingKafkaTest`: dos instancias se reparten las 3 particiones.
+- `ReportRangeTest`: tramos por hora UTC y por día de Chile, con días de 23 y 25 horas por cambio de horario, y fin de la ventana en el instante actual.
+- `KpiQueryServiceH2Test`: ceros y `null` sin filas o sin filas que calcen, parciales fuera de los KPIs, límites de tramo, altas y cierres posteriores al reloj fuera de todas las consultas, promedio solo de resueltos y sin depender del offset guardado, cumplimiento sin `SIN_PLAZO`, orden y límite de `top-procedures` con desempate por code point, label tras renombrar y desempate con altas en el mismo instante, incluso con tildes, mayúsculas y emojis.
+- `KpiControllerTest`: roles permitidos y 403 (Vecino, Funcionario, sin rol, dos roles), 403 antes que 400, mensajes de `range` y `limit`, valores por defecto, `null` serializados y cuerpo de error.
 
 ## Git
 
