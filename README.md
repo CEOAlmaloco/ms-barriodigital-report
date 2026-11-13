@@ -69,6 +69,20 @@ El servicio comparte el esquema de Oracle con los demás servicios de BarrioDigi
 
 `db/schema.sql` es la referencia de las dos tablas y sus índices.
 
+### Reparación de nombres de responsable: `repair-assignee-names.sql`
+
+Antes de un fix de requests y del BFF, algunos `request.assigned` llevaban el oid como `assigneeName`, y la proyección
+lo conserva: las alertas de plazo muestran el oid como responsable. Los eventos no se reemiten, así que el script
+corrige la proyección directamente. Toca solo las filas cuyo `assignee_name` es igual a `assignee_id` y cuyo
+`staff_member` (mismo esquema, de requests) ya tiene un nombre válido: no vacío y distinto del oid. No modifica
+eventos, `processed_events` ni `assignee_sequence`, así que un `request.assigned` posterior se aplica igual.
+
+1. **Correr antes** la reparación de requests (`repair-assignee-names.sql` de ese repo), con sus pasos previos:
+   desplegar los fixes y esperar a que cada funcionario afectado vuelva a entrar.
+2. **Revisar la vista previa**: las filas que se van a reparar, con el nombre nuevo.
+3. **Correr el script** con SQLcl, SQL*Plus o el worksheet de SQL Developer. Hace `COMMIT` al final y se puede repetir.
+4. **Revisar la comprobación final**: los pendientes son filas sin nombre válido todavía; se reparan en otra corrida.
+
 ## Kafka
 
 | | Valor |
@@ -187,6 +201,7 @@ Los tests usan H2 en modo Oracle, con las tablas de `src/test/resources/db/h2-re
 - `SlaStartupTest`: orden pendientes, recálculo, estado y listener, y listener iniciado aunque la preparación falle.
 - `SlaControllerTest`: roles y 403, orden por vencimiento y folio, paginación, `assignee=me` con y sin `X-User-Id`, `none`, mensajes de error, y lote en orden con desconocidos, parciales, sin plazo, mayúsculas y límites.
 - `SlaHealthTest`: el grupo `sla` muestra su detalle y el health general no.
+- `RepairAssigneeNamesScriptTest`: el script de reparación corrige solo los nombres iguales al id con fuente válida, se puede repetir y no toca `assignee_sequence`.
 
 ## Git
 
