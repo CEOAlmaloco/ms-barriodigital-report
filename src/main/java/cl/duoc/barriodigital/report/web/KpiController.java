@@ -56,7 +56,7 @@ public class KpiController {
         return kpiQueryService.topProcedures(parsedRange, limit(limit));
     }
 
-    private static ReportRange range(String value, ReportRange defaultRange) {
+    static ReportRange range(String value, ReportRange defaultRange) {
         if (value == null) {
             return defaultRange;
         }

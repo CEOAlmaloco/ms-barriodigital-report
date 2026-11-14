@@ -49,6 +49,9 @@ public final class ProjectionRows {
         private String folio = "BD-2026-" + String.format("%06d", FOLIO.incrementAndGet() % 1_000_000);
         private String procedureType;
         private String procedureLabel;
+        private String sector;
+        private Double latitude;
+        private Double longitude;
         private RequestStatus status;
         private Instant createdAt;
         private Instant closedAt;
@@ -108,6 +111,14 @@ public final class ProjectionRows {
             return this;
         }
 
+        /** Cualquiera de los tres puede ir en null. */
+        public Row location(String newSector, Double newLatitude, Double newLongitude) {
+            sector = newSector;
+            latitude = newLatitude;
+            longitude = newLongitude;
+            return this;
+        }
+
         public Row ids(String id, String newFolio) {
             requestId = id;
             folio = newFolio;
@@ -117,11 +128,12 @@ public final class ProjectionRows {
         public String insert() {
             jdbc.update("""
                             insert into report_request_projection
-                              (request_id, folio, procedure_type, procedure_label, status, last_sequence,
-                               created_at, sla_business_days, due_date, due_soon_date, sla_status, closed_at,
-                               assignee_id, assignee_name, last_event_at)
-                            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                    requestId, folio, procedureType, procedureLabel, status == null ? null : status.name(), 1L,
+                              (request_id, folio, procedure_type, procedure_label, sector, latitude, longitude,
+                               status, last_sequence, created_at, sla_business_days, due_date, due_soon_date,
+                               sla_status, closed_at, assignee_id, assignee_name, last_event_at)
+                            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                    requestId, folio, procedureType, procedureLabel, sector, latitude, longitude,
+                    status == null ? null : status.name(), 1L,
                     at(createdAt, ZoneOffset.UTC), slaBusinessDays, dueDate, dueSoonDate,
                     slaStatus == null ? null : slaStatus.name(), at(closedAt, closedOffset),
                     assigneeId, assigneeName, at(lastEventAt, ZoneOffset.UTC));

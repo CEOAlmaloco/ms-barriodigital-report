@@ -18,6 +18,7 @@ Los contratos están en `barriodigital-infra/docs/decisiones.md`: tópicos y eve
 | GET | `/api/report/top-procedures?range=last24h\|last7d&limit=5` | Tipos con más altas en la ventana. Admin y Auditor |
 | GET | `/api/report/sla?status=VENCIDO,POR_VENCER&assignee=me\|none&page=0&size=20` | Trámites abiertos vencidos o por vencer, por fecha de vencimiento. Funcionario, Admin y Auditor |
 | GET | `/api/report/sla/batch?requestIds=<uuid>,...` | Estado y fecha de vencimiento de hasta 50 trámites, en el orden pedido. Funcionario, Admin y Auditor |
+| GET | `/api/report/map-points?range=last24h\|last7d&status=<estados>&procedureType=<codigo>` | Hasta 1000 puntos del mapa, del alta más reciente a la más antigua, con el total con ubicación, los trámites sin ubicación y la concentración por sector de todos los resultados. Funcionario, Admin y Auditor |
 | GET | `/actuator/health` | Estado del servicio, incluida la base de datos (`db`) |
 | GET | `/actuator/health/sla` | Calendario de feriados y preparación de plazos, con detalle visible |
 | GET | `/actuator/info` | Información del servicio |
