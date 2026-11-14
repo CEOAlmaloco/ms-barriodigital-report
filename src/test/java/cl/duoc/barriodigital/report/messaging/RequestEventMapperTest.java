@@ -12,6 +12,7 @@ import java.time.Instant;
 
 import static cl.duoc.barriodigital.report.messaging.RequestEventsFixtures.assigned;
 import static cl.duoc.barriodigital.report.messaging.RequestEventsFixtures.cancelled;
+import static cl.duoc.barriodigital.report.messaging.RequestEventsFixtures.citizenComment;
 import static cl.duoc.barriodigital.report.messaging.RequestEventsFixtures.contactLogged;
 import static cl.duoc.barriodigital.report.messaging.RequestEventsFixtures.created;
 import static cl.duoc.barriodigital.report.messaging.RequestEventsFixtures.rated;
@@ -47,6 +48,8 @@ class RequestEventMapperTest {
                 .isEqualTo(new RequestEvent.Assigned("func-1", "Funcionario Sur"));
         assertThat(known(contactLogged(REQUEST_ID, 5, AT)).change()).isInstanceOf(RequestEvent.Activity.class);
         assertThat(known(rated(REQUEST_ID, 6, AT, 5)).change()).isInstanceOf(RequestEvent.Activity.class);
+        assertThat(known(citizenComment(REQUEST_ID, 7, AT, true)).change()).isInstanceOf(RequestEvent.Activity.class);
+        assertThat(known(citizenComment(REQUEST_ID, 8, AT, false)).change()).isInstanceOf(RequestEvent.Activity.class);
     }
 
     @Test
@@ -176,6 +179,14 @@ class RequestEventMapperTest {
         ObjectNode missingChannel = contactLogged(REQUEST_ID, 2, AT);
         payload(missingChannel).putNull("channel");
         assertMalformed(missingChannel.toString(), "channel");
+
+        ObjectNode missingAttachmentFlag = citizenComment(REQUEST_ID, 2, AT, true);
+        payload(missingAttachmentFlag).remove("hasAttachment");
+        assertMalformed(missingAttachmentFlag.toString(), "hasAttachment");
+
+        ObjectNode textAttachmentFlag = citizenComment(REQUEST_ID, 2, AT, true);
+        payload(textAttachmentFlag).put("hasAttachment", "true");
+        assertMalformed(textAttachmentFlag.toString(), "hasAttachment");
     }
 
     @Test

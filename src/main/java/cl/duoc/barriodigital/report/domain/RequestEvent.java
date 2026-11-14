@@ -37,7 +37,7 @@ public record RequestEvent(
     public record Assigned(String assigneeId, String assigneeName) implements Change {
     }
 
-    /** request.contact-logged y request.rated: no cambian el estado ni el responsable. */
+    /** request.contact-logged, request.rated y request.citizen-comment: no cambian el estado ni el responsable. */
     public record Activity() implements Change {
     }
 }

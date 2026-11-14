@@ -22,6 +22,7 @@ import java.util.UUID;
 
 import static cl.duoc.barriodigital.report.messaging.RequestEventsFixtures.assigned;
 import static cl.duoc.barriodigital.report.messaging.RequestEventsFixtures.cancelled;
+import static cl.duoc.barriodigital.report.messaging.RequestEventsFixtures.citizenComment;
 import static cl.duoc.barriodigital.report.messaging.RequestEventsFixtures.created;
 import static cl.duoc.barriodigital.report.messaging.RequestEventsFixtures.newRequestId;
 import static cl.duoc.barriodigital.report.messaging.RequestEventsFixtures.rated;
@@ -122,6 +123,59 @@ class RequestEventsListenerH2Test {
         assertThat(projection.getStatus()).isEqualTo(RequestStatus.EN_GESTION);
         assertThat(projection.getStatusSequence()).isEqualTo(3L);
         assertThat(processedEvents.count()).isEqualTo(3);
+    }
+
+    @Test
+    void comentarioNoAlteraIndicadoresYElCambioDeEstadoPosteriorSeAplica(CapturedOutput output) {
+        String withComment = newRequestId();
+        String control = newRequestId();
+        for (String requestId : new String[] {withComment, control}) {
+            listener.onMessage(record(created(requestId, 1, "2026-11-10T13:00:00Z", 5)));
+            listener.onMessage(record(assigned(requestId, 2, "2026-11-10T13:30:00Z", "func-1", "Funcionario Sur")));
+        }
+        listener.onMessage(record(citizenComment(withComment, 3, "2026-11-10T14:00:00Z", true)));
+
+        RequestProjection afterComment = projections.findById(withComment).orElseThrow();
+        assertThat(afterComment.getStatus()).isEqualTo(RequestStatus.INGRESADO);
+        assertThat(afterComment.getStatusSequence()).isEqualTo(1L);
+        assertThat(afterComment.getAssigneeSequence()).isEqualTo(2L);
+        assertThat(afterComment.getLastSequence()).isEqualTo(3L);
+        assertThat(afterComment.getLastEventAt()).isEqualTo(Instant.parse("2026-11-10T14:00:00Z"));
+
+        for (String requestId : new String[] {withComment, control}) {
+            listener.onMessage(record(statusChanged(requestId, 4, "2026-11-10T15:00:00Z", "INGRESADO", "ADMITIDO")));
+            listener.onMessage(record(statusChanged(requestId, 5, "2026-11-10T16:00:00Z", "ADMITIDO", "RECHAZADO")));
+        }
+
+        RequestProjection commented = projections.findById(withComment).orElseThrow();
+        assertThat(commented.getStatus()).isEqualTo(RequestStatus.RECHAZADO);
+        assertThat(commented.getStatusSequence()).isEqualTo(5L);
+        assertThat(commented.getClosedAt()).isEqualTo(Instant.parse("2026-11-10T16:00:00Z"));
+        assertThat(commented.getLastSequence()).isEqualTo(5L);
+        // Todo lo que leen los KPIs, el plazo y el mapa coincide con el trámite sin comentario.
+        assertThat(commented).usingRecursiveComparison()
+                .ignoringFields("requestId", "isNew")
+                .isEqualTo(projections.findById(control).orElseThrow());
+        assertThat(processedEvents.count()).isEqualTo(9);
+        assertThat(output).doesNotContain("evento-desconocido");
+    }
+
+    @Test
+    void comentarioAntesDelAltaCreaUnaProyeccionParcialQueElAltaCompleta() {
+        String requestId = newRequestId();
+        listener.onMessage(record(citizenComment(requestId, 2, "2026-11-10T14:00:00Z", false)));
+
+        RequestProjection partial = projections.findById(requestId).orElseThrow();
+        assertThat(partial.getStatus()).isNull();
+        assertThat(partial.getCreatedAt()).isNull();
+
+        listener.onMessage(record(created(requestId, 1, "2026-11-10T13:00:00Z", 5)));
+
+        RequestProjection completed = projections.findById(requestId).orElseThrow();
+        assertThat(completed.getStatus()).isEqualTo(RequestStatus.INGRESADO);
+        assertThat(completed.getCreatedAt()).isEqualTo(Instant.parse("2026-11-10T13:00:00Z"));
+        assertThat(completed.getLastSequence()).isEqualTo(2L);
+        assertThat(completed.getLastEventAt()).isEqualTo(Instant.parse("2026-11-10T14:00:00Z"));
     }
 
     @Test
