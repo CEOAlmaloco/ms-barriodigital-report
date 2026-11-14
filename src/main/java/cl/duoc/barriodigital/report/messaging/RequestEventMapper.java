@@ -28,6 +28,7 @@ public class RequestEventMapper {
     static final String CONTACT_LOGGED = "request.contact-logged";
     static final String ASSIGNED = "request.assigned";
     static final String RATED = "request.rated";
+    static final String CITIZEN_COMMENT = "request.citizen-comment";
 
     /** Una versión mayor es incompatible: va a la DLT hasta que report la soporte. */
     static final Map<String, Set<Integer>> SUPPORTED_VERSIONS = Map.of(
@@ -36,7 +37,8 @@ public class RequestEventMapper {
             CANCELLED, Set.of(1),
             CONTACT_LOGGED, Set.of(1),
             ASSIGNED, Set.of(1),
-            RATED, Set.of(1));
+            RATED, Set.of(1),
+            CITIZEN_COMMENT, Set.of(1));
 
     private static final String PRODUCER = "requests";
     private static final Set<String> ROLES = Set.of("Admin", "Funcionario", "Vecino", "Auditor");
@@ -100,6 +102,8 @@ public class RequestEventMapper {
             case ASSIGNED -> assigned(envelope, convert(payload, RequestEventEnvelope.Assigned.class));
             case CONTACT_LOGGED -> contactLogged(envelope, convert(payload, RequestEventEnvelope.ContactLogged.class));
             case RATED -> rated(envelope, convert(payload, RequestEventEnvelope.Rated.class));
+            case CITIZEN_COMMENT ->
+                    citizenComment(envelope, convert(payload, RequestEventEnvelope.CitizenComment.class));
             default -> throw new IllegalStateException("eventType sin conversion: " + envelope.eventType());
         };
     }
@@ -147,6 +151,12 @@ public class RequestEventMapper {
     private RequestEvent rated(RequestEventEnvelope envelope, RequestEventEnvelope.Rated p) {
         requireIdentity(p.requestId(), p.folio());
         require(p.score() != null && p.score() >= 1 && p.score() <= 5, "Payload invalido: score");
+        return event(envelope, p.requestId(), p.folio(), new RequestEvent.Activity());
+    }
+
+    private RequestEvent citizenComment(RequestEventEnvelope envelope, RequestEventEnvelope.CitizenComment p) {
+        requireIdentity(p.requestId(), p.folio());
+        require(p.hasAttachment() != null, "Payload invalido: falta hasAttachment");
         return event(envelope, p.requestId(), p.folio(), new RequestEvent.Activity());
     }
 

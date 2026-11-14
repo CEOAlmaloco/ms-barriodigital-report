@@ -54,4 +54,7 @@ record RequestEventEnvelope(
 
     record Rated(String requestId, String folio, Integer score) {
     }
+
+    record CitizenComment(String requestId, String folio, Boolean hasAttachment) {
+    }
 }

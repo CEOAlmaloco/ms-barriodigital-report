@@ -85,6 +85,12 @@ public final class RequestEventsFixtures {
         return envelope("request.rated", sequence, occurredAt, "Vecino", payload);
     }
 
+    public static ObjectNode citizenComment(String requestId, long sequence, String occurredAt, boolean hasAttachment) {
+        ObjectNode payload = payload(requestId);
+        payload.put("hasAttachment", hasAttachment);
+        return envelope("request.citizen-comment", sequence, occurredAt, "Vecino", payload);
+    }
+
     public static ConsumerRecord<String, String> record(ObjectNode event) {
         String key = event.path("payload").path("requestId").asText(null);
         return new ConsumerRecord<>(TOPIC, 0, 0L, key, event.toString());
