@@ -1,5 +1,7 @@
 package cl.duoc.barriodigital.report.adapter.in.web;
 
+import cl.duoc.barriodigital.report.adapter.in.web.dto.ErrorBody;
+
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

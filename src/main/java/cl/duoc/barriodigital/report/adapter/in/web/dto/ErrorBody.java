@@ -1,4 +1,4 @@
-package cl.duoc.barriodigital.report.adapter.in.web;
+package cl.duoc.barriodigital.report.adapter.in.web.dto;
 
 import org.springframework.http.HttpStatus;
 
@@ -20,7 +20,7 @@ public final class ErrorBody {
         return body;
     }
 
-    static String reasonPhrase(int status) {
+    public static String reasonPhrase(int status) {
         HttpStatus resolved = HttpStatus.resolve(status);
         return resolved == null ? "Error" : resolved.getReasonPhrase();
     }
