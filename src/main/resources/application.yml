@@ -1,0 +1,108 @@
+server:
+  port: 8086
+  error:
+    include-message: never
+    include-stacktrace: never
+    include-exception: false
+    include-binding-errors: never
+
+spring:
+  application:
+    name: ms-barriodigital-report
+  config:
+    import: optional:file:.env[.properties],classpath:holidays-cl.yml
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    # Solo kafka-admin crea topics. Report no declara NewTopic.
+    admin:
+      auto-create: false
+    consumer:
+      group-id: report-group
+      enable-auto-commit: false
+      auto-offset-reset: earliest
+      max-poll-records: 50
+      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      properties:
+        spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
+        spring.deserializer.value.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
+        # Range ordena los miembros por id. Con el prefijo report del listener, los hilos de dos instancias
+        # se intercalan (report-0, report-0, report-1...) y las 3 particiones quedan repartidas entre ambas.
+        partition.assignment.strategy: org.apache.kafka.clients.consumer.RangeAssignor
+    # Solo publica en la DLT.
+    producer:
+      acks: all
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      properties:
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 5
+        max.block.ms: 5000
+        request.timeout.ms: 5000
+        delivery.timeout.ms: 10000
+        linger.ms: 0
+    listener:
+      ack-mode: record
+      concurrency: 3
+  task:
+    scheduling:
+      pool:
+        size: 2
+      thread-name-prefix: report-scheduled-
+  jackson:
+    deserialization:
+      accept-float-as-int: false
+    mapper:
+      allow-coercion-of-scalars: false
+  datasource:
+    url: ${ORACLE_URL}
+    username: ${ORACLE_USER}
+    password: ${ORACLE_PASSWORD}
+    driver-class-name: oracle.jdbc.OracleDriver
+    hikari:
+      pool-name: barriodigital-report-oracle
+      maximum-pool-size: 5
+      minimum-idle: 1
+      connection-timeout: 30000
+      data-source-properties:
+        oracle.net.tns_admin: ${ORACLE_WALLET_DIR}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+
+barriodigital:
+  kafka:
+    topic:
+      requests-events: requests.events
+      requests-events-dlt: requests.events.report.DLT
+    listener:
+      auto-startup: true
+  report:
+    scheduling:
+      enabled: true
+  # Fijo por contrato: POR_VENCER con 2 días hábiles o menos, contando hoy si es hábil y el vencimiento.
+  sla:
+    due-soon-business-days: 2
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when_authorized
+      # Solo el grupo del calendario muestra su detalle sin autorización: es informativo y no expone la base.
+      group:
+        sla:
+          include: sla
+          show-details: always
+  health:
+    db:
+      enabled: true
