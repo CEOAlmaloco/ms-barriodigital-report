@@ -4,11 +4,20 @@ Microservicio de reportería de **BarrioDigital**: KPIs y plazos de los trámite
 
 Puerto: **8086**
 
+
+<!-- EP3.5-01 contratos -->
+## Contratos
+
+Contratos vigentes en `barriodigital-infra` (EP3.5-01). Índice: [docs/contratos](https://github.com/CEOAlmaloco/barriodigital-infra/blob/develop/docs/contratos/README.md).
+
+- [APIs report y audit](https://github.com/CEOAlmaloco/barriodigital-infra/blob/develop/docs/contratos/report-audit.md)
+- [Eventos Kafka](https://github.com/CEOAlmaloco/barriodigital-infra/blob/develop/docs/contratos/kafka-topicos.md)
+
 ## Responsabilidad
 
 Consume `requests.events` y mantiene una proyección por trámite en Oracle, que es la base de los KPIs y los plazos. Las consultas leen esa proyección y nunca reprocesan eventos.
 
-Los contratos están en `barriodigital-infra/docs/decisiones.md`: tópicos y eventos Kafka, publicación y consumo, plazos en días hábiles y APIs de report y audit.
+Los contratos están en `barriodigital-infra/docs/contratos/README.md`: tópicos y eventos Kafka, publicación y consumo, plazos en días hábiles y APIs de report y audit.
 
 ## Endpoints
 
