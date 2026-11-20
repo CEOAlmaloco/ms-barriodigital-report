@@ -207,3 +207,8 @@ Los tests usan H2 en modo Oracle, con las tablas de `src/test/resources/db/h2-re
 ## Git
 
 Ramas de tarea desde `develop` y PR hacia `develop`, según `barriodigita-info/convenciones.md`.
+
+## Contratos verificables
+
+- `contracts/openapi.json`: contrato HTTP del servicio, generado desde los controladores. `OpenApiContractTest` falla si una ruta, un parámetro o un cuerpo cambia sin actualizarlo. Para regenerarlo después de revisar el cambio: `./mvnw test -Dtest=OpenApiContractTest -Dopenapi.update=true`.
+- La CI corre las pruebas, busca secretos en los commits nuevos con gitleaks y escanea la imagen con Trivy. Falla si el cambio agrega una vulnerabilidad crítica que la rama destino no tenía; las existentes quedan en el resumen del job.
