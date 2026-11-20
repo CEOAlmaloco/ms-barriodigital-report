@@ -1,0 +1,425 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "ms-barriodigital-report",
+    "version" : "1"
+  },
+  "paths" : {
+    "/api/report/kpis" : {
+      "get" : {
+        "operationId" : "kpis",
+        "parameters" : [ {
+          "in" : "header",
+          "name" : "X-User-Roles",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "range",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/KpisView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "kpi-controller" ]
+      }
+    },
+    "/api/report/map-points" : {
+      "get" : {
+        "operationId" : "mapPoints",
+        "parameters" : [ {
+          "in" : "header",
+          "name" : "X-User-Roles",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "range",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "status",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "procedureType",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MapPointsView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "map-points-controller" ]
+      }
+    },
+    "/api/report/sla" : {
+      "get" : {
+        "operationId" : "alerts",
+        "parameters" : [ {
+          "in" : "header",
+          "name" : "X-User-Roles",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "header",
+          "name" : "X-User-Id",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "status",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "assignee",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SlaAlertsView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "sla-controller" ]
+      }
+    },
+    "/api/report/sla/batch" : {
+      "get" : {
+        "operationId" : "batch",
+        "parameters" : [ {
+          "in" : "header",
+          "name" : "X-User-Roles",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "requestIds",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SlaBatchView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "sla-controller" ]
+      }
+    },
+    "/api/report/top-procedures" : {
+      "get" : {
+        "operationId" : "topProcedures",
+        "parameters" : [ {
+          "in" : "header",
+          "name" : "X-User-Roles",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "range",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "limit",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TopProceduresView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "kpi-controller" ]
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "Item" : {
+        "type" : "object",
+        "properties" : {
+          "count" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "procedureLabel" : {
+            "type" : "string"
+          },
+          "procedureType" : {
+            "type" : "string"
+          }
+        }
+      },
+      "KpisView" : {
+        "type" : "object",
+        "properties" : {
+          "activeByStatus" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "integer",
+              "format" : "int64"
+            }
+          },
+          "averageResolutionHours" : {
+            "type" : "number"
+          },
+          "lastEventAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "range" : {
+            "type" : "string"
+          },
+          "requestsOverTime" : {
+            "$ref" : "#/components/schemas/RequestsOverTime"
+          },
+          "resolvedCount" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "slaCompliance" : {
+            "$ref" : "#/components/schemas/SlaCompliance"
+          }
+        }
+      },
+      "MapPointsView" : {
+        "type" : "object",
+        "properties" : {
+          "bySector" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/SectorCount"
+            }
+          },
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Item"
+            }
+          },
+          "lastEventAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "locatedTotal" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "range" : {
+            "type" : "string"
+          },
+          "withoutLocation" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "Point" : {
+        "type" : "object",
+        "properties" : {
+          "bucketStart" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "count" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "RequestsOverTime" : {
+        "type" : "object",
+        "properties" : {
+          "bucket" : {
+            "type" : "string"
+          },
+          "points" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Point"
+            }
+          }
+        }
+      },
+      "SectorCount" : {
+        "type" : "object",
+        "properties" : {
+          "count" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "sector" : {
+            "type" : "string"
+          }
+        }
+      },
+      "SlaAlertsView" : {
+        "type" : "object",
+        "properties" : {
+          "content" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Item"
+            }
+          },
+          "lastEventAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalElements" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "totalPages" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "SlaBatchView" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Item"
+            }
+          },
+          "lastEventAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }
+      },
+      "SlaCompliance" : {
+        "type" : "object",
+        "properties" : {
+          "late" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "onTime" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "rate" : {
+            "type" : "number"
+          }
+        }
+      },
+      "TopProceduresView" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Item"
+            }
+          },
+          "lastEventAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "range" : {
+            "type" : "string"
+          }
+        }
+      }
+    }
+  }
+}
