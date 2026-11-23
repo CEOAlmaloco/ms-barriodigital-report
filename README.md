@@ -4,11 +4,20 @@ Microservicio de reportería de **BarrioDigital**: KPIs y plazos de los trámite
 
 Puerto: **8086**
 
+## Contratos
+
+Contratos vigentes en `barriodigital-infra` ([índice](https://github.com/CEOAlmaloco/barriodigital-infra/blob/develop/docs/contratos/README.md)):
+
+- [APIs report y audit](https://github.com/CEOAlmaloco/barriodigital-infra/blob/develop/docs/contratos/report-audit.md)
+- [Eventos Kafka](https://github.com/CEOAlmaloco/barriodigital-infra/blob/develop/docs/contratos/kafka-topicos.md)
+- [Publicación y consumo Kafka](https://github.com/CEOAlmaloco/barriodigital-infra/blob/develop/docs/contratos/kafka-publicacion.md)
+- [Plazos en días hábiles](https://github.com/CEOAlmaloco/barriodigital-infra/blob/develop/docs/contratos/requests-plazos.md)
+
 ## Responsabilidad
 
 Consume `requests.events` y mantiene una proyección por trámite en Oracle, que es la base de los KPIs y los plazos. Las consultas leen esa proyección y nunca reprocesan eventos.
 
-Los contratos están en `barriodigital-infra/docs/decisiones.md`: tópicos y eventos Kafka, publicación y consumo, plazos en días hábiles y APIs de report y audit.
+Los contratos están en `barriodigital-infra/docs/contratos/`: tópicos y eventos Kafka (`kafka-topicos.md`), publicación y consumo (`kafka-publicacion.md`), plazos en días hábiles (`requests-plazos.md`) y APIs de report y audit (`report-audit.md`).
 
 ## Endpoints
 
@@ -207,3 +216,8 @@ Los tests usan H2 en modo Oracle, con las tablas de `src/test/resources/db/h2-re
 ## Git
 
 Ramas de tarea desde `develop` y PR hacia `develop`, según `barriodigita-info/convenciones.md`.
+
+## Contratos verificables
+
+- `contracts/openapi.json`: contrato HTTP del servicio, generado desde los controladores. `OpenApiContractTest` falla si una ruta, un parámetro o un cuerpo cambia sin actualizarlo. Para regenerarlo después de revisar el cambio: `./mvnw test -Dtest=OpenApiContractTest -Dopenapi.update=true`.
+- La CI corre las pruebas, busca secretos en los commits nuevos con gitleaks y escanea la imagen con Trivy. Falla si el cambio agrega una vulnerabilidad crítica que la rama destino no tenía; las existentes quedan en el resumen del job.
